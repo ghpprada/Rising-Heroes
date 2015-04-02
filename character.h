@@ -3,7 +3,7 @@ using std::string;
 
 class Character {
 	public:
-		Character(string name = "", string job = "", int level = 1, int exp = 0, int money = 1, int str = 1, int def = 1, int mag = 1, int agi = 1){
+		Character(string name = "", int job = 1, int level = 1, int exp = 0, int money = 1, int str = 1, int def = 1, int mag = 1, int agi = 1){
 			m_name=name;
 			m_job=job;
 			m_level=level;
@@ -17,8 +17,8 @@ class Character {
 	
 		string get_name() {return m_name;}
 		void set_name(string name) {m_name=name;}
-		string get_job() {return m_job;}
-		void set_job(string job) {m_job=job;}	
+		int get_job() {return m_job;}
+		void set_job(int job) {m_job=job;}	
 		int get_level() {return m_level;}
 		void set_level(int level) {m_level=level;}
 		int get_exp() {return m_exp;}
@@ -37,7 +37,7 @@ class Character {
 	
 	private:
 		string m_name;
-		string m_job;
+		int m_job;
 		int m_level;
 		int m_exp;
 		int m_money;
@@ -49,6 +49,7 @@ class Character {
 
 struct Attributes
 {
+	int job_id;
     int base_STR;
     int scaling_STR;
     int base_DEF;
@@ -61,7 +62,8 @@ struct Attributes
 	string passive1_desc;
 	string passive2_desc;
     
-	Attributes(int str=0, int upstr=0, int def=0, int updef=0, int mag=0, int upmag=0, int agi=0, int upagi=0, string gendesc="", string passive1desc="", string passive2desc="") {
+	Attributes(int jobid = 1, int str=0, int upstr=0, int def=0, int updef=0, int mag=0, int upmag=0, int agi=0, int upagi=0, string gendesc="", string passive1desc="", string passive2desc="") {
+		this->job_id = jobid;
 	    this->base_STR = str;
 	    this->scaling_STR = upstr;
 	    this->base_DEF = def;
@@ -80,7 +82,7 @@ typedef std::map<string, Attributes> JobList;
 JobList g_jobs;
 
 
-Character create_new_character(string name, string job)
+Character create_new_character(string name, int job)
 {
     Character ch;
     ch.set_name(name);
@@ -92,7 +94,7 @@ Character create_new_character(string name, string job)
     JobList::iterator it_joblist;
 
     for (it_joblist = g_jobs.begin(); it_joblist != g_jobs.end(); ++it_joblist) {
-        if (it_joblist->first == job) {
+        if (it_joblist->second.job_id == job) {
             ch.set_str(it_joblist->second.base_STR);
             ch.set_def(it_joblist->second.base_DEF);
             ch.set_mag(it_joblist->second.base_MAG);

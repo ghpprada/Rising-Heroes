@@ -38,6 +38,7 @@ using std::flush;
 void initialize()
 {
     g_jobs.insert(std::make_pair("Knight", Attributes(
+    	1,//Vocation ID
 		5, 2,//STR
 		10, 3,//DEF
 		1, 1,//MAG
@@ -47,6 +48,7 @@ void initialize()
 		"Endure: Raises DEF stat every turn, stacking up to 4 times. If it was already applied 4 times, the stacks reset in your next turn.")));
 		
     g_jobs.insert(std::make_pair("Warrior", Attributes(
+    	2,//Vocation ID
 		8, 3,//STR
 		6, 2,//DEF
 		2, 1,//MAG
@@ -57,6 +59,7 @@ void initialize()
 		)));
 		
     g_jobs.insert(std::make_pair("Rogue", Attributes(
+    	3,//Vocation ID
 		5, 2,//STR
 		3, 1,//DEF
 		12, 3,//MAG
@@ -67,6 +70,7 @@ void initialize()
 		)));
 		
     g_jobs.insert(std::make_pair("Ranger", Attributes(
+    	4,//Vocation ID
 		5, 2,//STR
 		3, 1,//DEF
 		12, 3,//MAG
@@ -77,6 +81,7 @@ void initialize()
 		)));
 		
     g_jobs.insert(std::make_pair("Sorcerer", Attributes(
+    	5,//Vocation ID
 		2, 1,//STR
 		3, 1,//DEF
 		12, 4,//MAG
@@ -87,6 +92,7 @@ void initialize()
 		)));
 		
     g_jobs.insert(std::make_pair("Spiritguard", Attributes(
+    	6,//Vocation ID
 		5, 2,//STR
 		3, 1,//DEF
 		12, 3,//MAG
@@ -97,6 +103,7 @@ void initialize()
 		)));
 		
     g_jobs.insert(std::make_pair("Blackbelt", Attributes(
+    	7,//Vocation ID
 		5, 2,//STR
 		3, 1,//DEF
 		12, 3,//MAG
@@ -115,14 +122,13 @@ int main()
 		bool gameLoop;
 		std::stringstream sstm;
 		string msg;
-		int a=0, b=0, c=0;
 		
 	//Related to the New Game/Load Menu
 		int mainMenuOption;
 		
 	//Related to Character Creation
 		int jobOption, confirmJobOption;
-		string newchar_name, newchar_job;
+		string newchar_name;
 		string job_desc, passive1_desc, passive2_desc;
 		JobList::iterator it_joblist;
 	
@@ -134,80 +140,81 @@ int main()
 	initialize();
 	
 	do{//GameLoop
-		if(ch.get_name() == "")
-		do{
-			cout << "Please choose an option.\n1. New Game\n2. Load Game\n\nOption: " << flush;
-			cin >> mainMenuOption;
-			
-			switch(mainMenuOption){
-				case 1://New Game
-					clearScreen();
-					cout << "- Hey kid, it's a good day here in Naive City, isn't it? What is your name?" << endl;
-					do{
+		if(ch.get_name() == ""){
+			do{//New Game / Load Game Loop
+				mainMenuOption = 0;
+				cout << "Please choose an option.\n1. New Game\n2. Load Game\n\nOption: " << flush;
+				cin >> mainMenuOption;
+				
+				switch(mainMenuOption){
+					case 1://New Game
+						clearScreen();
+						cout << "- Hey kid, it's a good day here in Naive City, isn't it? What is your name?" << endl;
+						do{
+							cin >> newchar_name;
+							if(newchar_name.length() < 3){
+								cout << "- This name is too short. Please pick a bigger one." << endl;
+								newchar_name.clear();
+							}
+							if(newchar_name.length() > 15){
+								cout << "- This name is too long. Please pick a shorter one." << endl;
+								newchar_name.clear();
+							}
+						}while(newchar_name == "");
+						
+						clearScreen();
+						cout << "- It's a pleasure to meet you, " << newchar_name << "." << endl;
+						do{
+							cout << "- Every kid has a dream, you know. What do you aspire to be in your future?\n1. Knight\n2. Warrior\n3. Rogue\n4. Ranger\n5. Sorcerer\n6. Spiritguard\n7. Blackbelt\n\nOption: " << flush;
+							cin >> jobOption;
+							if (jobOption >= 1 and jobOption <= 7){	
+								for (it_joblist = g_jobs.begin(); it_joblist != g_jobs.end(); ++it_joblist){
+									if (jobOption == it_joblist->second.job_id){
+										clearScreen();
+										sstm.clear();
+										sstm << "Chosen job: " << it_joblist->first << "\n\n" << it_joblist->second.general_desc << "\n\nPassive 1 - " << it_joblist->second.passive1_desc << "\nPassive 2 - " << it_joblist->second.passive2_desc <<
+										 "\n\nStats\nSTR:" << it_joblist->second.base_STR << " (+" << it_joblist->second.scaling_STR << " per level)" << "\nDEF:" << it_joblist->second.base_DEF << " (+" <<
+										  it_joblist->second.scaling_DEF << " per level)" << "\nMAG:" << it_joblist->second.base_MAG << " (+" << it_joblist->second.scaling_MAG << " per level)" <<
+										  "\nAGI:" << it_joblist->second.base_AGI << " (+" << it_joblist->second.scaling_AGI << " per level)" << "\n\nAre you sure you want to be a " << it_joblist->first << "?\n\n1.Yes\n2.No\n\nOption: " << flush;
+										break;
+									}	
+								}
+								msg = sstm.str();
+							 	cout << msg;
+								cin >> confirmJobOption;
+								if(confirmJobOption != 1){
+									jobOption = 0;
+									confirmJobOption = 0;
+									clearScreen();
+								}
+							} 
+							else
+								cout << "- This is not a valid choice, child." << endl;
+	
+						}while(!jobOption >= 1 && !jobOption <= 7  && confirmJobOption != 1);
+						ch = create_new_character(newchar_name, jobOption);
+						sstm << ch.get_name() << "\n" << ch.get_job() << "\n" << ch.get_level() << "\n" << ch.get_exp() << "\n" << ch.get_money() << "\n" << ch.get_str() << "\n" << ch.get_def() << "\n" << ch.get_mag() << "\n" << ch.get_agi() << "\n";
+						msg = sstm.str();
+						cout << msg;
+						break;
+						
+					case 2://Load Game				
+						clearScreen();
+						cout << "What is the name of your saved character?" << endl;
 						cin >> newchar_name;
-						if(newchar_name.length() < 3){
-							cout << "- This name is too short. Please pick a bigger one." << endl;
-							newchar_name.clear();
-						}
-						if(newchar_name.length() > 15){
-							cout << "- This name is too long. Please pick a shorter one." << endl;
-							newchar_name.clear();
-						}
-					}while(newchar_name == "");
-					cout << "- It's a pleasure to meet you, " << newchar_name << "." << endl;
-					do{
-						cout << "- Every kid has a dream, you know. What do you aspire to be in your future?\n1. Knight\n2. Warrior\n3. Rogue\n4. Ranger\n5. Sorcerer\n6. Spiritguard\n7. Blackbelt\n\nOption: " << flush;
-						cin >> jobOption;
-						if (jobOption >= 1 and jobOption <= 7){	
-							a = 0;
-							for (it_joblist = g_jobs.begin(); it_joblist != g_jobs.end(); ++it_joblist){
-								cout << it_joblist->first;
-								if (jobOption == a){
-									newchar_job = it_joblist->first;
-									sstm.clear();
-									sstm << "-----------\nChosen job: " << newchar_job << "\n\n" << it_joblist->second.general_desc << "\n\nPassive 1: " << it_joblist->second.passive1_desc << "\nPassive 2: " << it_joblist->second.passive2_desc <<
-									 "\n\nStats\nSTR:" << it_joblist->second.base_STR << " (+" << it_joblist->second.scaling_STR << " per level)" << "\nDEF:" << it_joblist->second.base_DEF << " (+" <<
-									  it_joblist->second.scaling_DEF << " per level)" << "\nMAG:" << it_joblist->second.base_MAG << " (+" << it_joblist->second.scaling_MAG << " per level)" <<
-									  "\nAGI:" << it_joblist->second.base_AGI << " (+" << it_joblist->second.scaling_AGI << " per level)" << "\n\nAre you sure you want to be a " << newchar_job << "?\n\n1.Yes\n2.No\n\nOption: " << flush;
-									break;
-								}	
-								a++;
-							}
-							msg = sstm.str();
-						 	cout << msg;
-							cin >> confirmJobOption;
-							if(confirmJobOption != 1){
-								newchar_job.clear();
-								clearScreen();
-							}
-						} 
-						else
-							cout << "- This is not a valid choice, child." << endl;
-
-					}while(newchar_job == "" && confirmJobOption != 1);
-					ch = create_new_character(newchar_name, newchar_job);
-					sstm << ch.get_name() << "\n" << ch.get_job() << "\n" << ch.get_level() << "\n" << ch.get_exp() << "\n" << ch.get_money() << "\n" << ch.get_str() << "\n" << ch.get_def() << "\n" << ch.get_mag() << "\n" << ch.get_agi() << "\n";
-					msg = sstm.str();
-					cout << msg;
-					break;
+						break;
+						
+					default:
+						cout << "Invalid option." << endl;
+				}
+				
+				clearScreen();
+				if(mainMenuOption == 2 && foundSave == false)
+					cout << "There is no save file with such name. Please input a valid character name." << endl;
 					
-				case 2://Load Game				
-					clearScreen();
-					cout << "What is the name of your saved character?" << endl;
-					cin >> newchar_name;
-					break;
-					
-				default:
-					cout << "Invalid option." << endl;
-			}
-			
-			clearScreen();
-			if(mainMenuOption == 2 && foundSave == false){
-				cout << "There is no save file with such name. Please input a valid character name." << endl;
-			}
-		}while((mainMenuOption != 2 && foundSave == true) && mainMenuOption != 1);
-		
-		cout << "Fate established.";
-		cin >> b;
+			}while((mainMenuOption != 2 && foundSave == false) && mainMenuOption != 1);
+			cout << "Fate established.";
+			system("pause");
+		}
 	}while(gameLoop);
 }
